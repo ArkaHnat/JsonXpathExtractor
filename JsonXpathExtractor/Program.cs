@@ -12,6 +12,7 @@ class Program
 	private const string inputPath = "input.json";
 	private const string xPathPath = "xpathlist.json";
 	private const string outputPath = "output.json";
+	private const bool ignoreEmptyJsonObjects = true;
 
 	static void Main(string[] args)
 	{
@@ -107,7 +108,13 @@ class Program
 				{
 					if (i == parts.Length - 1)
 					{
+						var currentPart = currentInput[part];
+						if (ignoreEmptyJsonObjects && currentPart.ToString().Trim() == "{}")
+						{
+							continue;
+						}
 						currentOutput[part] = currentInput[part];
+
 					}
 					else
 					{

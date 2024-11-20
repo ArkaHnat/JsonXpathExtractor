@@ -1,5 +1,8 @@
 [
-    "name",
-    "address.city",
-    "contacts[].type"
+  "name",
+  "lala",
+  "emptyObject",
+  "emptyArray",
+  "address.city",
+  "contacts[].type"
 ]

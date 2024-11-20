@@ -1,6 +1,8 @@
 {
   "name": "John Doe",
   "age": 30,
+  "emptyObject": { },
+  "emptyArray": [],
   "address": {
     "city": "New York",
     "zipcode": "10001"
