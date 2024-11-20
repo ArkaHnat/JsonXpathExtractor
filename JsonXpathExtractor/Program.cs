@@ -8,11 +8,14 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 class Program
 {
-	private const string arrayWildcard = "[]";
+	private const string arrayWildcard = "[*]";
 	private const string inputPath = "input.json";
 	private const string xPathPath = "xpathlist.json";
 	private const string outputPath = "output.json";
 	private const bool ignoreEmptyJsonObjects = true;
+	private const char leftSquareBracket = '[';
+	private const char rightSquareBracket = ']';
+	private const string curlyBracketPair = "{}";
 
 	static void Main(string[] args)
 	{
@@ -29,7 +32,7 @@ class Program
 		}
 
 		File.WriteAllText(outputPath, JsonConvert.SerializeObject(outputObject, Newtonsoft.Json.Formatting.Indented));
-		Console.WriteLine("Filtered JSON saved to output.json");
+		Console.WriteLine($"Filtered JSON saved to {outputPath}");
 	}
 
 	static void AddFieldToOutput(JObject input, JObject output, string xpath)
@@ -46,12 +49,12 @@ class Program
 
 			if (isArrayWildcard)
 			{
-				part = part.Substring(0, part.Length - 2); // Remove "[]"
+				part = part.Substring(0, part.Length - 3); 
 			}
-			else if (part.Contains("[") && part.Contains("]"))
+			else if (part.Contains(leftSquareBracket) && part.Contains(rightSquareBracket))
 			{
-				int startIndex = part.IndexOf('[');
-				arrayPart = part.Substring(startIndex).Trim('[', ']');
+				int startIndex = part.IndexOf(leftSquareBracket);
+				arrayPart = part.Substring(startIndex).Trim(leftSquareBracket, rightSquareBracket);
 				part = part.Substring(0, startIndex);
 			}
 
@@ -61,32 +64,24 @@ class Program
 				{
 					if (isArrayWildcard)
 					{
-						// Extract a specific property from all elements in the array
-						JArray extractedArray = new JArray();
+						JArray filteredArray = new JArray();
 						foreach (JToken element in array)
 						{
-							if (i == parts.Length - 1)
+							if (element is JObject obj)
 							{
-								extractedArray.Add(element);
-							}
-							else if (element is JObject obj)
-							{
-								JToken nextInput = obj;
+								JObject filteredElement = new JObject();
 								for (int j = i + 1; j < parts.Length; j++)
 								{
-									string nextPart = parts[j];
-									if (nextInput[nextPart] != null)
+									string subPart = parts[j];
+									if (obj[subPart] != null)
 									{
-										nextInput = nextInput[nextPart];
-										if (j == parts.Length - 1)
-										{
-											extractedArray.Add(nextInput);
-										}
+										filteredElement[subPart] = obj[subPart];
 									}
 								}
+								filteredArray.Add(filteredElement);
 							}
 						}
-						currentOutput[part] = extractedArray;
+						currentOutput[part] = filteredArray;
 						break;
 					}
 					else if (arrayPart != null && int.TryParse(arrayPart, out int index) && index < array.Count)
@@ -108,13 +103,11 @@ class Program
 				{
 					if (i == parts.Length - 1)
 					{
-						var currentPart = currentInput[part];
-						if (ignoreEmptyJsonObjects && currentPart.ToString().Trim() == "{}")
+						if (ignoreEmptyJsonObjects && currentInput[part].ToString().Trim() == curlyBracketPair)
 						{
 							continue;
 						}
 						currentOutput[part] = currentInput[part];
-
 					}
 					else
 					{
@@ -127,3 +120,4 @@ class Program
 		}
 	}
 }
+

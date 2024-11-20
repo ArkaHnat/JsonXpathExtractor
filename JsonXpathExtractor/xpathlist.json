@@ -4,5 +4,5 @@
   "emptyObject",
   "emptyArray",
   "address.city",
-  "contacts[].type"
+  "contacts[*].type"
 ]
