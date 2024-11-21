@@ -29,7 +29,6 @@
       "value": "123-456-7890",
       "nested": [
         {
-          "subType": "mobile",
           "number": "555-1234"
         },
         {

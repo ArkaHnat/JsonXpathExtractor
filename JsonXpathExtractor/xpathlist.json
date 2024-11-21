@@ -2,7 +2,9 @@
   "name",
   "contacts[*].type",
   "contacts[*].nested[*].subType",
-    "contacts[*].nested2[*].subType",
+
+  "contacts[*].nested[*].nonexistent",
+  "contacts[*].nonexistent[*].subType",
   "emptyArray",
   "emptyObject",
   "nullObject"
