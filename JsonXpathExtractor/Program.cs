@@ -35,11 +35,11 @@ class Program
 		Console.WriteLine($"Filtered JSON saved to {outputPath}");
 	}
 
-	static void AddFieldToOutput(JObject input, JObject output, string xpath)
+	static void AddFieldToOutput(JToken input, JToken output, string xpath)
 	{
 		string[] parts = xpath.Split('.');
 		JToken currentInput = input;
-		JObject currentOutput = output;
+		JToken currentOutput = output;
 
 		for (int i = 0; i < parts.Length; i++)
 		{
@@ -49,11 +49,11 @@ class Program
 
 			if (isArrayWildcard)
 			{
-				part = part.Substring(0, part.Length - 3); 
+				part = part.Substring(0, part.Length - 2);
 			}
 			else if (part.Contains(leftSquareBracket) && part.Contains(rightSquareBracket))
 			{
-				int startIndex = part.IndexOf(leftSquareBracket);
+				int startIndex = part.IndexOf('[');
 				arrayPart = part.Substring(startIndex).Trim(leftSquareBracket, rightSquareBracket);
 				part = part.Substring(0, startIndex);
 			}
@@ -70,32 +70,35 @@ class Program
 							if (element is JObject obj)
 							{
 								JObject filteredElement = new JObject();
-								for (int j = i + 1; j < parts.Length; j++)
+								string subXPath = string.Join('.', parts[(i + 1)..]); // Remaining parts of XPath
+								AddFieldToOutput(obj, filteredElement, subXPath);
+								if (filteredElement.HasValues)
 								{
-									string subPart = parts[j];
-									if (obj[subPart] != null)
-									{
-										filteredElement[subPart] = obj[subPart];
-									}
+									filteredArray.Add(filteredElement);
 								}
-								filteredArray.Add(filteredElement);
 							}
 						}
-						currentOutput[part] = filteredArray;
+						if (filteredArray.Count > 0)
+						{
+							((JObject)currentOutput)[part] = filteredArray;
+						}
 						break;
 					}
-					else if (arrayPart != null && int.TryParse(arrayPart, out int index) && index < array.Count)
+					
+					if (arrayPart != null && int.TryParse(arrayPart, out int index) && index < array.Count)
 					{
+						var currentPart = currentInput[part];
+
 						if (i == parts.Length - 1)
 						{
-							currentOutput[part] = currentOutput[part] ?? new JArray();
+							((JObject)currentOutput)[part] = currentOutput[part] ?? new JArray();
 							((JArray)currentOutput[part]).Add(array[index]);
 						}
 						else
 						{
 							currentInput = array[index];
-							currentOutput[part] = currentOutput[part] ?? new JObject();
-							currentOutput = (JObject)currentOutput[part];
+							((JObject)currentOutput)[part] = currentOutput[part] ?? new JObject();
+							currentOutput = currentOutput[part];
 						}
 					}
 				}
@@ -103,21 +106,25 @@ class Program
 				{
 					if (i == parts.Length - 1)
 					{
-						if (ignoreEmptyJsonObjects && currentInput[part].ToString().Trim() == curlyBracketPair)
+						if (ignoreEmptyJsonObjects && currentInput[part].ToString().Trim() == curlyBracketPair || string.IsNullOrWhiteSpace(currentInput[part].ToString().Trim()))
 						{
 							continue;
 						}
-						currentOutput[part] = currentInput[part];
+						((JObject)currentOutput)[part] = currentInput[part];
 					}
 					else
 					{
 						currentInput = currentInput[part];
-						currentOutput[part] = currentOutput[part] ?? new JObject();
-						currentOutput = (JObject)currentOutput[part];
+						((JObject)currentOutput)[part] = currentOutput[part] ?? new JObject();
+						currentOutput = currentOutput[part];
 					}
 				}
 			}
+			else
+			{
+				break;
+			}
 		}
 	}
-}
+	}
 

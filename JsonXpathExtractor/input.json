@@ -1,8 +1,10 @@
 {
   "name": "John Doe",
   "age": 30,
-  "emptyObject": { },
+
   "emptyArray": [],
+  "emptyObject": {},
+  "nullObject": null,
   "address": {
     "city": "New York",
     "zipcode": "10001"
@@ -10,11 +12,31 @@
   "contacts": [
     {
       "type": "email",
-      "value": "john@example.com"
+      "value": "john@example.com",
+      "nested": [
+        {
+          "subType": "personal",
+          "email": "personal@example.com"
+        },
+        {
+          "subType": "work",
+          "email": "work@example.com"
+        }
+      ]
     },
     {
       "type": "phone",
-      "value": "123-456-7890"
+      "value": "123-456-7890",
+      "nested": [
+        {
+          "subType": "mobile",
+          "number": "555-1234"
+        },
+        {
+          "subType": "landline",
+          "number": "555-5678"
+        }
+      ]
     }
   ]
 }

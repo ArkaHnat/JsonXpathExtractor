@@ -1,8 +1,9 @@
 [
   "name",
-  "lala",
-  "emptyObject",
+  "contacts[*].type",
+  "contacts[*].nested[*].subType",
+    "contacts[*].nested2[*].subType",
   "emptyArray",
-  "address.city",
-  "contacts[*].type"
+  "emptyObject",
+  "nullObject"
 ]
